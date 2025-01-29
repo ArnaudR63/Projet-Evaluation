@@ -1,0 +1,263 @@
+@import url(https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap);
+
+html script,
+html style {
+    display: none;
+}
+
+@keyframes link {
+    0% {
+        margin-left: 50%;
+        width: 0;
+    }
+
+    100% {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+@property --primary {
+    syntax: '<color>';
+    inherits: false;
+    initial-value: #d06027;
+}
+
+@property --black {
+    syntax: '<color>';
+    inherits: false;
+    initial-value: #000000;
+}
+
+@property --white {
+    syntax: '<color>';
+    inherits: false;
+    initial-value: #ffffff;
+}
+
+html,
+body,
+body * {
+    margin: 0;
+    padding: 0;
+}
+
+body * {
+    position: relative;
+    box-sizing: border-box;
+    display: block;
+    transition: all 0.3s;
+    font-family: 'Heebo', sans-serif;
+    font-size: 24px;
+}
+
+title {
+    display: none;
+}
+
+a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+a:hover {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+a::after {
+    content: '';
+    display: block;
+    width: 0;
+    margin-left: 50%;
+    height: 1px;
+    background: var(--primary);
+}
+
+a:hover::after {
+    animation: link 0.3s both;
+}
+
+.button {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    color: var(--white);
+    background: var(--black);
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border: 0;
+}
+
+.button:hover {
+    border: 2px solid var(--primary);
+    color: var(--white);
+}
+
+.button::after {
+    display: none;
+    content: none;
+}
+
+html {
+    width: 100vw;
+    overflow-x: hidden;
+}
+
+body {
+    margin-top: 120px;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/*Menu*/
+header {
+    height: 120px;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 20px;
+    background-color: var(--black);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+}
+
+header * {
+    font-size: 18px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+#links {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+#home,
+#home img {
+    height: 80px;
+    cursor: pointer;
+}
+
+#home::after,
+#account a::after,
+#account ul {
+    display: none;
+}
+
+#toggle-menu {
+    cursor: pointer;
+}
+
+#toggle-menu.open #lines {
+    transform: translate(1px, 2px);
+}
+
+#toggle-menu.open #line1 {
+    transform: translateX(4px) rotate(-45deg) translateY(-3px);
+    transform-origin: 66% center;
+}
+
+#toggle-menu.open #line2 {
+    transform: translateX(2px) rotate(45deg);
+    transform-origin: 66% center;
+}
+
+#account {
+    position: relative;
+}
+
+#account img {
+    height: 43px;
+    width: 38px;
+    aspect-ratio: 1/1;
+    object-fit: contain;
+}
+
+#account.open ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    column-rule: 2px var(--white);
+    background: var(--primary);
+    position: absolute;
+    top: 75px;
+    right: -30px;
+    padding: 15px 30px;
+    width: 250px;
+}
+
+#account.open ul::before {
+    content: '';
+    display: block;
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    background: var(--primary);
+    transform: rotate(45deg);
+    top: -15px;
+    left: calc(80% - 15px);
+}
+
+#account.open li > a:hover {
+    color: var(--white);
+    transform: translateX(20px);
+}
+
+#menu {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: var(--black);
+    color: var(--white);
+    height: calc(100vh - 120px);
+    width: 100vw;
+    transform: translateX(100vw);
+    position: fixed;
+    top: 120px;
+    left: 0;
+    padding: 20px;
+    align-items: center;
+    justify-content: space-evenly;
+    list-style-type: none;
+}
+
+nav:has(#toggle-menu.open) #menu {
+    transform: translate(0);
+}
+
+/*Footer*/
+footer {
+    display: flex;
+    flex-direction: column;
+    color: var(--white);
+    gap: 10px;
+    background-color: var(--black);
+    padding: 10px 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+footer span {
+    display: none;
+}
+
+footer a {
+    width: fit-content;
+}
