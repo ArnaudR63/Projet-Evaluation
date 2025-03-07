@@ -1,4 +1,5 @@
 <?php
+require_once('/realpath/config.php');
 require_once($GLOBALS['realpathLocation'] . '/sql.php');
 
 if (isset($_POST['consent']) && $_POST['consent'] === 'on') {

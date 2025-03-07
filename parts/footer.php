@@ -13,17 +13,17 @@ function get_footer( $page ): string {
 		case 'shop':
 			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/assets/scripts/shop.js" async defer></script>';
 			break;
-		case 'product':
-			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/assets/scripts/product.js" async defer></script>';
+		case 'blog':
+			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/assets/scripts/blog.js" async defer></script>';
 			break;
 		case 'contact':
 			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/assets/scripts/contact.js" async defer></script>';
 			break;
 		case 'admin':
-			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/assets/scripts/admin.js" async defer></script>';
+			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/admin/assets/scripts/admin.js" async defer></script>';
 			break;
 		case 'admin_settings':
-			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/assets/scripts/admin.js" async defer></script>';
+			$html .= '<script src="' . $GLOBALS['siteLocation'] . '/admin/assets/scripts/admin.js" async defer></script>';
 			break;
 	}
 

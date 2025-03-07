@@ -1,5 +1,5 @@
 <?php
-require_once('../config.php');
+require_once('/realpath/config.php');
 require_once($GLOBALS['realpathLocation'] . '/sql.php');
 
 $user = isset($_POST['user']) ? $_POST['user'] : false;

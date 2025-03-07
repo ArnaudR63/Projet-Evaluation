@@ -1,126 +1,123 @@
 <?php
-require_once( "../sql.php" );
+require_once("/realpath/sql.php");
 
 try {
-	if ( checkConnection() === 9 ) {
+    if (checkConnection() === 9) {
 		$co = connectSql();
-		$catTable = $GLOBALS['table_prefix'] . 'Categories';
+		if (!$co) {
+			exit;
+		}        $catTable = $GLOBALS['table_prefix'] . 'Categories';
+        $action = isset($_GET["action"]) ? htmlspecialchars($_GET["action"]) : '';
 
-		$action = htmlspecialchars( $_GET["action"] );
-		if ( $action === "create" ) {
-			try {
-				$catName = str_replace( ' ', '_', strtolower( htmlspecialchars( $_POST['category_name'] ) ) );
-				$img = $_FILES['cat_image']['tmp_name'];
-				$filename = "../assets/images/cat/$catName-" . time() . ".png";
-				$fileExist = move_uploaded_file( $img, $filename );
+        if ($action === "create" && isset($_POST['category_name'], $_FILES['cat_image'])) {
+            try {
+                $catName = str_replace(' ', '_', strtolower(htmlspecialchars($_POST['category_name'])));
+                $img = $_FILES['cat_image']['tmp_name'];
+                $extension = pathinfo($_FILES['cat_image']['name'], PATHINFO_EXTENSION);
+                $filename = "/realpath/assets/images/cat/{$catName}-" . time() . ".{$extension}";
 
-				$fileUrl = "";
+                if ($_FILES['cat_image']['error'] !== UPLOAD_ERR_OK) {
+                    error_log("Erreur upload : " . $_FILES['cat_image']['error']);
+                    throw new Exception("Erreur lors du téléchargement de l'image.");
+                }
 
-				if ( $fileExist ) {
-					$linkExtracted = str_replace( '../', '', $filename );
+                $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+                if (!in_array($extension, $allowedTypes)) {
+                    throw new Exception("Type de fichier non autorisé. Veuillez télécharger une image.");
+                }
 
-					$fileUrl = str_starts_with( $filename, '../assets/images/cat/' )
-						&& str_ends_with( $filename, '.png' )
-						? "https://preprod.developp-et-vous.com/$linkExtracted" : throw new Exception( "Le lien n'est pas valide" );
-				}
-				$sql = "INSERT INTO $catTable (Name, Thumbnail) VALUES (:name, :thumbnail)";
-				$stmt = $co->prepare( $sql );
-				$stmt->execute( [ ':name' => $catName, ':thumbnail' => $fileUrl ] );
+                if (move_uploaded_file($img, $filename)) {
+                    $fileUrl = str_replace('/home/develoz/preprod/', 'https://test.com/', $filename);
+                    $sql = "INSERT INTO $catTable (Name, Thumbnail) VALUES (:name, :thumbnail)";
+                    $stmt = $co->prepare($sql);
+                    $stmt->execute([':name' => $catName, ':thumbnail' => $fileUrl]);
+                    header("Location: $siteLocation/admin?msg=added");
+                    exit;
+                }
+                throw new Exception("Le fichier n'a pas pu être déplacé.");
+            } catch (Exception $e) {
+                error_log("Erreur dans la création de la catégorie : " . $e->getMessage());
+                header("Location: $siteLocation/admin?msg=notAdded");
+                exit;
+            }
+        } elseif ($action === "delete" && isset($_GET['id'])) {
+            try {
+                $id = (int) $_GET['id'];
+                $sql = "SELECT Thumbnail FROM $catTable WHERE ID = :id";
+                $stmt = $co->prepare($sql);
+                $stmt->execute([':id' => $id]);
+                $thumb = $stmt->fetchColumn();
 
-				header( "Location: $siteLocation/admin?msg=added" );
-			} catch (Exception $e) {
-				header( "Location: $siteLocation/admin?msg=notAdded" );
-			}
-		} elseif ( $action === "delete" ) {
-			if ( isset( $_GET['id'] ) ) {
-				try {
-					$id = (int) $_GET['id'];
+                if ($thumb) {
+                    $filePath = str_replace('https://test.com/', '/home/develoz/preprod/', $thumb);
+                    @unlink($filePath);
+                }
 
-					$sql = "SELECT Thumbnail FROM $catTable WHERE ID = $id";
-					$thumb = executeSql( $co, $sql )[0]['Thumbnail'];
-					@unlink( str_replace( 'https://preprod.developp-et-vous.com/', '../', $thumb ) );
+                $sql = "DELETE FROM $catTable WHERE ID = :id";
+                $stmt = $co->prepare($sql);
+                $stmt->execute([':id' => $id]);
+                header("Location: $siteLocation/admin?msg=deleted");
+                exit;
+            } catch (Exception $e) {
+                error_log("Erreur dans la suppression de la catégorie : " . $e->getMessage());
+                header("Location: $siteLocation/admin?msg=notDeleted");
+                exit;
+            }
+        } elseif ($action === "update" && isset($_GET['id'], $_POST['id']) && $_GET['id'] === $_POST['id']) {
+            try {
+                $id = (int) $_POST['id'];
+                $sql = "SELECT Name, Thumbnail FROM $catTable WHERE ID = :id";
+                $stmt = $co->prepare($sql);
+                $stmt->execute([':id' => $id]);
+                $category = $stmt->fetch(PDO::FETCH_ASSOC);
 
-					$sql = "DELETE FROM $catTable WHERE ID = $id";
-					executeSql( $co, $sql );
-					header( "Location: $siteLocation/admin?msg=deleted" );
-				} catch (Exception $e) {
-					header( "Location: $siteLocation/admin?msg=notDeleted" );
-				}
-			} else {
-				header( "Location: $siteLocation/admin?msg=noId&id=" . $_GET['id'] );
-			}
-		} elseif ( $action === "update" ) {
-			if ( isset( $_GET['id'] ) && isset( $_POST['id'] ) && $_GET['id'] === $_POST['id'] ) {
-				try {
-                    //Nom
-					$cat = getCategory( $_POST['id'] );
-					$change = false;
-					$oldCatName = str_replace( '_', ' ', ucfirst( htmlspecialchars( $cat['Name'] ) ) );
-					$catName = $oldCatName;
-					if ( $oldCatName !== htmlspecialchars( $_POST['catName'] ) ) {
-						$change = true;
-						$catName = str_replace( ' ', '_', strtolower( htmlspecialchars( $_POST['catName'] ) ) );
-					}
+                if (!$category) {
+                    throw new Exception("Catégorie introuvable.");
+                }
 
-                    //Image
-					$oldThumbUrl = str_replace( 'https://preprod.developp-et-vous.com/', '../', $oldThumbUrl );
-					$oldThumb = "";
-					if ( file_exists( $oldThumbUrl ) ) {
-						$imageData = base64_encode( file_get_contents( $oldThumbUrl ) );
-						$mimeType = mime_content_type( $oldThumbUrl );
-						$oldThumb = "data:$mimeType;base64,$imageData";
-					}
-					if ( $oldThumb !== $_POST['catImage'] ) {
-						$change = true;
-						$base64String = $_POST['catImage'];
-						$matches = [];
-						if ( preg_match( '/^data:image\/(\w+);base64,/', $base64String, $matches ) ) {
-							$imageType = $matches[1];
-							$base64String = substr( $base64String, strpos( $base64String, ',' ) + 1 );
-							$base64String = base64_decode( $base64String );
-							if ( $base64String === false ) {
-								throw new Exception( "L'encodage base64 est invalide." );
-							}
-							$newFileName = "../assets/images/cat/{$catName}-" . time() . ".{$imageType}";
-							if ( ! file_put_contents( $newFileName, $base64String ) ) {
-								throw new Exception( "Impossible de sauvegarder l'image." );
-							}
-							$fileUrl = str_replace( '../', 'https://preprod.developp-et-vous.com/', $newFileName );
-							if ( file_exists( $oldThumbUrl ) ) {
-								@unlink( $oldThumbUrl );
-							}
-						} else {
-							throw new Exception( "Le format base64 est invalide." );
-						}
-					} else {
-						$fileUrl = htmlspecialchars( $cat['Thumbnail'] );
-					}
+                $catName = str_replace(' ', '_', strtolower(htmlspecialchars($_POST['catName'])));
+                $fileUrl = $category['Thumbnail'];
 
-                    //MàJ BDD
-					if ( $change ) {
-						$sql = "UPDATE $catTable SET Name = :name, Thumbnail = :thumbnail WHERE ID = :id";
-						$stmt = $co->prepare( $sql );
-						$stmt->execute( [ 
-							':name' => $catName,
-							':thumbnail' => $fileUrl,
-							':id' => $_POST['id']
-						] );
-					}
-					header( "Location: $siteLocation/admin?msg=updated" );
-				} catch (Exception $e) {
-					header( "Location: $siteLocation/admin?msg=notUpdated" );
-				}
-			} else {
-				header( "Location: $siteLocation/admin?msg=noId" );
-			}
-		} else {
-			header( "Location: $siteLocation/admin?msg=noAction" );
-		}
-	} else {
-		header( "Location: $siteLocation/admin?msg=notAdmin" );
-	}
+                if (!empty($_POST['catImage']) && preg_match('/^data:image\/([a-zA-Z]+);base64,/', $_POST['catImage'], $matches)) {
+                    $imageType = $matches[1];
+                    $base64Data = substr($_POST['catImage'], strpos($_POST['catImage'], ',') + 1);
+                    $decodedData = base64_decode($base64Data);
+
+                    if ($decodedData === false) {
+                        throw new Exception("L'encodage base64 est invalide.");
+                    }
+
+                    $newFileName = "/realpath/assets/images/cat/{$catName}-" . time() . ".{$imageType}";
+                    if (file_put_contents($newFileName, $decodedData)) {
+                        @unlink(str_replace('https://test.com/', '/home/develoz/preprod/', $category['Thumbnail']));
+                        $fileUrl = str_replace('/home/develoz/preprod/', 'https://test.com/', $newFileName);
+                    } else {
+                        throw new Exception("Impossible de sauvegarder l'image.");
+                    }
+                }
+
+                $sql = "UPDATE $catTable SET Name = :name, Thumbnail = :thumbnail WHERE ID = :id";
+                $stmt = $co->prepare($sql);
+                $stmt->execute([':name' => $catName, ':thumbnail' => $fileUrl, ':id' => $id]);
+
+                header("Location: $siteLocation/admin?msg=updated");
+                exit;
+            } catch (Exception $e) {
+                error_log("Erreur dans la mise à jour de la catégorie : " . $e->getMessage());
+                header("Location: $siteLocation/admin?msg=notUpdated");
+                exit;
+            }
+        } else {
+            header("Location: $siteLocation/admin?msg=noAction");
+            exit;
+        }
+    } else {
+        header("Location: $siteLocation/admin?msg=notAdmin");
+        exit;
+    }
 } catch (Exception $e) {
-	echo $e->getMessage();
+    error_log("Erreur générale : " . $e->getMessage());
+    echo "Erreur : " . $e->getMessage();
 } finally {
-	$co = null;
+    $co = null;
 }

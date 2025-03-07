@@ -1,5 +1,5 @@
 <?php
-require_once( "../sql.php" );
+require_once( "/realpath/sql.php" );
 
 try {
 	$co = connectSql();
@@ -30,13 +30,13 @@ try {
 				throw new Exception( "Catégorie invalide." );
 			}
 
-			$filename = "../assets/images/products/$productName-" . time() . ".png";
+			$filename = "/realpath/assets/images/products/$productName-" . time() . ".png";
 			if ( ! move_uploaded_file( $img, $filename ) ) {
 				throw new Exception( "Échec du téléchargement de l'image." );
 			}
 
-			$linkExtracted = str_replace( '../', '', $filename );
-			$fileUrl = "https://preprod.developp-et-vous.com/$linkExtracted";
+			$linkExtracted = str_replace( '/home/develoz/preprod/', '', $filename );
+			$fileUrl = "https://test.com/$linkExtracted";
 
 			$sql = "INSERT INTO $productsTable (Name, Description, Category, Thumbnail) VALUES (:name, :desc, :cat, :thumbnail)";
 			$stmt = $co->prepare( $sql );
@@ -64,7 +64,7 @@ try {
 			$thumb = $stmt->fetchColumn();
 
 			if ( $thumb ) {
-				$filePath = str_replace( 'https://preprod.developp-et-vous.com/', '../', $thumb );
+				$filePath = str_replace( 'https://test.com/', '/home/develoz/preprod/', $thumb );
 				@unlink( $filePath );
 			}
 
@@ -93,7 +93,7 @@ try {
 					$change = true;
 				}
 
-				$oldThumbUrl = str_replace( 'https://preprod.developp-et-vous.com/', '../', $product['Thumbnail'] );
+				$oldThumbUrl = str_replace( 'https://test.com/', '/home/develoz/preprod/', $product['Thumbnail'] );
 				$oldThumb = "";
 				if ( file_exists( $oldThumbUrl ) ) {
 					$imageData = base64_encode( file_get_contents( $oldThumbUrl ) );
@@ -111,11 +111,11 @@ try {
 						if ( $base64String === false ) {
 							throw new Exception( "L'encodage base64 est invalide." );
 						}
-						$newFileName = "../assets/images/products/{$productName}-" . time() . ".{$imageType}";
+						$newFileName = "/realpath/assets/images/products/{$productName}-" . time() . ".{$imageType}";
 						if ( ! file_put_contents( $newFileName, $base64String ) ) {
 							throw new Exception( "Impossible de sauvegarder l'image." );
 						}
-						$fileUrl = str_replace( '../', 'https://preprod.developp-et-vous.com/', $newFileName );
+						$fileUrl = str_replace( '/home/develoz/preprod/', 'https://test.com/', $newFileName );
 						if ( file_exists( $oldThumbUrl ) ) {
 							@unlink( $oldThumbUrl );
 						}
@@ -138,7 +138,7 @@ try {
 				}
 				header( "Location: $siteLocation/admin?msg=updated" );
 			} catch (Exception $e) {
-				var_dump( $e );
+				header( "Location: $siteLocation/admin?msg=notUpdated" );
 			}
 		} else {
 			header( "Location: $siteLocation/admin?msg=noId" );

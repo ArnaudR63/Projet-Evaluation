@@ -2,7 +2,7 @@
 
 try {
     $page = 'home';
-    require_once('../parts/header.php');
+    require_once('/realpath/parts/header.php');
     echo get_header($page);
     ?>
     <div id="inscription">

@@ -1,5 +1,6 @@
 <?php
-require_once('../config.php');
+require_once('/realpath/config.php');
+require_once('/realpath/functions.php');
 
 function isConnected()
 {
@@ -20,6 +21,12 @@ function get_header($page): string
 		case '':
 			$page = 'home';
 			break;
+		case '404':
+			$page = 'error';
+			break;
+		case '500':
+			$page = 'error';
+			break;
 		case 'networks/':
 			$page = 'networks';
 			break;
@@ -29,8 +36,11 @@ function get_header($page): string
 		case 'shop/product.php':
 			$page = 'product';
 			break;
-		case 'product/':
-			$page = 'product';
+		case 'blog/':
+			$page = 'blog';
+			break;
+		case 'blog/post.php':
+			$page = 'post';
 			break;
 		case 'contact/':
 			$page = 'contact';
@@ -62,26 +72,42 @@ function get_header($page): string
 				. '<title>Boutique de Développ et vous</title>';
 			break;
 		case 'product':
-			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/product.css">'
+			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/item.css">'
 				. '<title>' . 'Produit' . '</title>';
+			break;
+		case 'blog':
+			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/blog.css">'
+				. '<title>Blog de Développ et vous</title>';
+			break;
+		case 'post':
+			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/item.css">'
+				. '<title>' . 'Post ' . '</title>';
 			break;
 		case 'contact':
 			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/contact.css">'
 				. '<title>Contacter Développ et vous</title>';
 			break;
 		case 'admin':
-			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/admin.css">'
+			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/admin/assets/styles/admin.css">'
 				. '<title>Page administrateur</title>';
 			break;
 		case 'admin_settings':
-			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/admin.css">'
-				. '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/admin_settings.css">'
+			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/admin/assets/styles/admin.css">'
+				. '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/admin/assets/styles/admin_settings.css">'
 				. '<title>Réglages du compte</title>';
+			break;
+		case '404':
+			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/error.css">'
+				. '<title>Erreur 404</title>';
+			break;
+		case '500':
+			$html .= '<link rel="stylesheet" href="' . $GLOBALS['siteLocation'] . '/assets/styles/error.css">'
+				. '<title>Erreur 500</title>';
 			break;
 	}
 
 	$html .= '</head>
-	<body>
+	<body> 
 		<header>
 			<nav>
 				<a href="' . $GLOBALS['siteLocation'] . '" title="Revenir à l\'accueil" id="home">
@@ -90,6 +116,7 @@ function get_header($page): string
 				<ul id="menu">
 					<li class="item"><a href="' . $GLOBALS['siteLocation'] . '/networks">Réseaux</a></li>
 					<li class="item"><a href="' . $GLOBALS['siteLocation'] . '/shop">Boutique</a></li>
+					<li class="item"><a href="' . $GLOBALS['siteLocation'] . '/blog">Blog</a></li>
 					<li class="item"><a href="' . $GLOBALS['siteLocation'] . '/contact">Contact</a></li>
 				</ul>
 				<div id="links">

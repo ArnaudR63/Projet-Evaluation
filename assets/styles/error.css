@@ -1,0 +1,1 @@
+#banner{display:flex;flex-direction:column;min-height:calc(100vh - 120px);width:100%;gap:50px;align-items:center;justify-content:center}h1{font-size:40px}@media screen and (max-width:980px){#banner{justify-content:flex-start}}

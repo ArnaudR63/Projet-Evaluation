@@ -18,7 +18,7 @@ ob_start();
 <div class="flex">
 	<div class="column">
 		<img src="<?= $data['Thumbnail'] ?>" alt="<?= $data['Name'] ?>">
-		<h1><?= $data['Name'] ?></h1>
+		<h1><?= str_replace('_', ' ', ucfirst(htmlspecialchars($data['Name']))) ?></h1>
 	</div>
 	<div class="column">
 		<p><?= $data['Description'] ?></p>

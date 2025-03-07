@@ -1,6 +1,6 @@
 <?php
 $page = 'admin_settings';
-require_once("../parts/header.php");
+require_once("/realpath/parts/header.php");
 require_once($GLOBALS['realpathLocation'] . '/sql.php');
 echo get_header($page);
 
@@ -49,7 +49,7 @@ if (!isset($_COOKIE['connection'])) {
     echo 'Impossible de vous authentifier';
 }
 
-require_once("../parts/footer.php");
+require_once("/realpath/parts/footer.php");
 echo get_footer($page);
 
 if (isset($_POST['action'])) {
