@@ -3,10 +3,6 @@ function getBlog($cat = null, $search = null)
 {
     try {
         $co = connectSql();
-        if (!$co) {
-            throw new Exception("Connexion à la base de données échouée.");
-        }
-
         $sql = "SELECT Blog.ID, Blog.Title, Blog.Preview, Blog.Content, PostsCategories.Name AS CategoryName 
                 FROM " . $GLOBALS['table_prefix'] . "Blog AS Blog
                 INNER JOIN " . $GLOBALS['table_prefix'] . "PostsCategories AS PostsCategories
@@ -55,10 +51,6 @@ function getPost($id)
 {
 	try {
 		$co = connectSql();
-		if (!$co) {
-			throw new Exception("Connexion à la base de données échouée.");
-		}
-
 		$sql = "";
 		$params = [];
 
@@ -81,10 +73,6 @@ function getPostCategories()
 {
 	try {
 		$co = connectSql();
-		if (!$co) {
-			throw new Exception("Connexion à la base de données échouée.");
-		}
-
 		$sql = "SELECT * FROM " . $GLOBALS['table_prefix'] . "PostsCategories";
 
 
@@ -100,10 +88,6 @@ function getPostCategory($id)
 {
 	try {
 		$co = connectSql();
-		if (!$co) {
-			throw new Exception("Connexion à la base de données échouée.");
-		}
-
 		$sql = "";
 		$params = [];
 
